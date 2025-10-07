@@ -1,0 +1,108 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación de Deftones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        header {
+            background-color: #222;
+            color: white;
+            text-align: center;
+            padding: 2em;
+        }
+        section {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 1em;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1em auto;
+            border-radius: 8px;
+        }
+        h2 {
+            color: #222;
+            text-align: center;
+        }
+        p {
+            line-height: 1.6;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Deftones: Una Mirada a su Legado</h1>
+    </header>
+
+    <section id="historia">
+        <h2>Historia de la Banda</h2>
+        <img src="images/deftones1.jpg" alt="Deftones en sus inicios">
+        <p>Deftones es una banda de metal alternativo formada en Sacramento, California, en 1988. Con su mezcla única de metal, shoegaze y elementos experimentales, han definido un sonido distintivo en el género nu-metal y más allá. Su álbum debut, "Adrenaline" (1995), marcó el comienzo de su impacto en la escena musical.</p>
+    </section>
+
+    <section id="discografia">
+        <h2>Discografía Destacada</h2>
+        <img src="images/deftones2.jpg" alt="Portada de White Pony">
+        <p>Entre sus álbumes más icónicos se encuentra "White Pony" (2000), que incluye éxitos como "Change (In the House of Flies)". Este álbum les valió un reconocimiento mundial y un Grammy por la canción "Elite". Otros trabajos destacados incluyen "Diamond Eyes" (2010) y "Koi No Yokan" (2012).</p>
+    </section>
+
+    <section id="influencia">
+        <h2>Influencia y Legado</h2>
+        <img src="images/deftones3.jpg" alt="Deftones en concierto">
+        <p>Deftones ha inspirado a innumerables bandas con su enfoque innovador y su capacidad para evolucionar. Su impacto se extiende más allá del metal, influenciando géneros como el post-rock y el dream pop. Su legado sigue vivo con giras mundiales y un sonido que continúa evolucionando.</p>
+    </section>
+</body>
+</html>
